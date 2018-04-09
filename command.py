@@ -33,7 +33,7 @@ def deposit(bot, update):
 	if user is None:
 		bot.send_message(chat_id=update.message.chat_id, text="Please set a telegram username in your profile settings!")
 	else:
-		address = "/usr/local/bin/reddcoind"
+		address = "/usr/local/bin/rupeed"
 		result = subprocess.run([address,"getaccountaddress",user],stdout=subprocess.PIPE)
 		clean = (result.stdout.strip()).decode("utf-8")
 		bot.send_message(chat_id=update.message.chat_id, text="@{0} your depositing address is: {1}".format(user,clean))
@@ -52,7 +52,7 @@ def tip(bot,update):
 		elif "@" in target:
 			target = target[1:]
 			user = update.message.from_user.username
-			core = "/usr/local/bin/reddcoind"
+			core = "/usr/local/bin/rupeed"
 			result = subprocess.run([core,"getbalance",user],stdout=subprocess.PIPE)
 			balance = float((result.stdout.strip()).decode("utf-8"))
 			amount = float(amount)
@@ -81,7 +81,7 @@ def balance(bot,update):
 	if user is None:
 		bot.send_message(chat_id=update.message.chat_id, text="Please set a telegram username in your profile settings!")
 	else:
-		core = "/usr/local/bin/reddcoind"
+		core = "/usr/local/bin/rupeed"
 		result = subprocess.run([core,"getbalance",user],stdout=subprocess.PIPE)
 		clean = (result.stdout.strip()).decode("utf-8")
 		balance  = float(clean)
@@ -116,7 +116,7 @@ def withdraw(bot,update):
 		address = ''.join(str(e) for e in address)
 		target = target.replace(target[:35], '')
 		amount = float(target)
-		core = "/usr/local/bin/reddcoind"
+		core = "/usr/local/bin/rupeed"
 		result = subprocess.run([core,"getbalance",user],stdout=subprocess.PIPE)
 		clean = (result.stdout.strip()).decode("utf-8")
 		balance = float(clean)
