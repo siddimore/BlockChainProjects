@@ -10,6 +10,8 @@ import subprocess
 from telegram.ext.dispatcher import run_async
 from telegram.ext import Updater
 from html import escape
+from registrationModule import registerUser
+
 
 from babel.numbers import format_currency
 import requests
@@ -28,15 +30,30 @@ def commands(bot, update):
 def help(bot, update):
 	bot.send_message(chat_id=update.message.chat_id, text="The following commands are at your disposal: /hi , /commands , /deposit , /tip , /withdraw , /price , /marketcap or /balance")
 
+def register_user(bot, update):
+	# Get UserName
+	user = update.message.from_user.username
+
+	if user is None:
+		bot.send_message(chat_id=update.message.chat_id, text="Please set a telegram username in your profile settings!")
+	else:
+		address, registered = registerUser(user)
+		if registered:
+			bot.send_message(chat_id=update.message.chat_id, text="@{0} your depositing tipbot address is: {1}".format(user,address))
+		else:
+			bot.send_message(chat_id=update.message.chat_id, text="Please set a telegram username in your profile settings!")
+
 def deposit(bot, update):
 	user = update.message.from_user.username
 	if user is None:
 		bot.send_message(chat_id=update.message.chat_id, text="Please set a telegram username in your profile settings!")
 	else:
 		address = "/usr/local/bin/rupeed"
-		result = subprocess.run([address,"getaccountaddress",user],stdout=subprocess.PIPE)
-		clean = (result.stdout.strip()).decode("utf-8")
+		process = subprocess.Popen([address,"getaccountaddress",user],stdout=subprocess.PIPE)
+		stdout, result = process.communicate()
+		clean = (stdout.strip()).decode("utf-8")
 		bot.send_message(chat_id=update.message.chat_id, text="@{0} your depositing address is: {1}".format(user,clean))
+		registerUser(user,clean)
 
 def tip(bot,update):
 	user = update.message.from_user.username
@@ -46,7 +63,7 @@ def tip(bot,update):
 	if user is None:
 		bot.send_message(chat_id=update.message.chat_id, text="Please set a telegram username in your profile settings!")
 	else:
-		machine = "@Reddcoin_bot"
+		machine = "@Rupee_bot"
 		if target == machine:
 			bot.send_message(chat_id=update.message.chat_id, text="HODL.")
 		elif "@" in target:
@@ -171,6 +188,9 @@ balance_handler = CommandHandler('balance', balance)
 dispatcher.add_handler(balance_handler)
 
 help_handler = CommandHandler('help', help)
+dispatcher.add_handler(help_handler)
+
+help_handler = CommandHandler('register', register_user)
 dispatcher.add_handler(help_handler)
 
 updater.start_polling()
