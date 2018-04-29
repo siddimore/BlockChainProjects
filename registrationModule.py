@@ -1,8 +1,9 @@
 import sqlite3
+import subprocess
 import uuid
 from flask import g
 
-DATABASE = 'test.db'
+DATABASE = 'tipbot.db'
 
 def get_db():
     db = None
@@ -39,21 +40,29 @@ def query_db(query, args=(), one=False):
     return (rv[0] if rv else None) if one else rv
 
 
-def registerUser(username):
+def registerUser(username, account_address):
 
     user = query_db('select * from tipbotassociations where user_id = ?', [username], one=True)
     if user is not None:
     #if localdb.execute("SELECT count(*) FROM tipbotassociations WHERE user_id=?", (username, )).fetchone()[0] > 0:
         print("UserName Already Exists")
         return user[1], True
+    # Now Try To Get Account Address For User
+	# address = "/usr/local/bin/rupeed"
+	# process = subprocess.Popen([address,"getaccountaddress",user],stdout=subprocess.PIPE)
+	# stdout, result = process.communicate()
+	# clean = (stdout.strip()).decode("utf-8")
 
 
+    # Add User To TipBot DB
     add_to_db('''INSERT INTO tipbotassociations(user_id, address)
                       VALUES(:user_id,:address)''',
-                      {'user_id':username, 'address':str(uuid.uuid4().hex)})
+                      {'user_id':username, 'address':account_address})
+
+    return True
 
     user = query_db('select * from tipbotassociations where user_id = ?', [username], one=True)
-    return user[1],True                 
+    return user[1],True
 
 
 # Call ALL Methods and see it works

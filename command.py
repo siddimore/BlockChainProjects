@@ -12,6 +12,7 @@ from telegram.ext import Updater
 from html import escape
 from registrationModule import registerUser
 
+
 from babel.numbers import format_currency
 import requests
 
@@ -29,15 +30,30 @@ def commands(bot, update):
 def help(bot, update):
 	bot.send_message(chat_id=update.message.chat_id, text="The following commands are at your disposal: /hi , /commands , /deposit , /tip , /withdraw , /price , /marketcap or /balance")
 
+def register_user(bot, update):
+	# Get UserName
+	user = update.message.from_user.username
+
+	if user is None:
+		bot.send_message(chat_id=update.message.chat_id, text="Please set a telegram username in your profile settings!")
+	else:
+		address, registered = registerUser(user)
+		if registered:
+			bot.send_message(chat_id=update.message.chat_id, text="@{0} your depositing tipbot address is: {1}".format(user,address))
+		else:
+			bot.send_message(chat_id=update.message.chat_id, text="Please set a telegram username in your profile settings!")
+
 def deposit(bot, update):
 	user = update.message.from_user.username
 	if user is None:
 		bot.send_message(chat_id=update.message.chat_id, text="Please set a telegram username in your profile settings!")
 	else:
-		address = "/usr/local/bin/reddcoind"
-		result = subprocess.run([address,"getaccountaddress",user],stdout=subprocess.PIPE)
-		clean = (result.stdout.strip()).decode("utf-8")
+		address = "/usr/local/bin/rupeed"
+		process = subprocess.Popen([address,"getaccountaddress",user],stdout=subprocess.PIPE)
+		stdout, result = process.communicate()
+		clean = (stdout.strip()).decode("utf-8")
 		bot.send_message(chat_id=update.message.chat_id, text="@{0} your depositing address is: {1}".format(user,clean))
+		registerUser(user,clean)
 
 def tip(bot,update):
 	user = update.message.from_user.username
@@ -48,12 +64,13 @@ def tip(bot,update):
 	if user is None:
 		bot.send_message(chat_id=update.message.chat_id, text="Please set a telegram username in your profile settings!")
 	else:
-		machine = "@Reddcoin_bot"
+		machine = "@Rupee_bot"
 		if target == machine:
 			bot.send_message(chat_id=update.message.chat_id, text="HODL.")
 		elif "@" in target:
 			target = target[1:]
 			user = update.message.from_user.username
+<<<<<<< HEAD
 			address, registered = registerUser(user)
 			print(address)
 			bot.send_message(chat_id=update.message.chat_id, text="@{0} your Tipping Wallet Address is {1}.".format(user, address))
@@ -70,6 +87,21 @@ def tip(bot,update):
 			# 	amount = str(amount)
 			# 	tx = subprocess.run([core,"move",user,target,amount],stdout=subprocess.PIPE)
 			# 	bot.send_message(chat_id=update.message.chat_id, text="@{0} tipped @{1} of {2} RDD".format(user, target, amount))
+=======
+			core = "/usr/local/bin/rupeed"
+			result = subprocess.run([core,"getbalance",user],stdout=subprocess.PIPE)
+			balance = float((result.stdout.strip()).decode("utf-8"))
+			amount = float(amount)
+			if balance < amount:
+				bot.send_message(chat_id=update.message.chat_id, text="@{0} you have insufficent funds.".format(user))
+			elif target == user:
+				bot.send_message(chat_id=update.message.chat_id, text="You can't tip yourself silly.")
+			else:
+				balance = str(balance)
+				amount = str(amount)
+				tx = subprocess.run([core,"move",user,target,amount],stdout=subprocess.PIPE)
+				bot.send_message(chat_id=update.message.chat_id, text="@{0} tipped @{1} of {2} RDD".format(user, target, amount))
+>>>>>>> 3010d9972734d543aadfb0863cdacdf259657938
 		else:
 			bot.send_message(chat_id=update.message.chat_id, text="Error that user is not applicable.")
 
@@ -86,7 +118,7 @@ def balance(bot,update):
 	if user is None:
 		bot.send_message(chat_id=update.message.chat_id, text="Please set a telegram username in your profile settings!")
 	else:
-		core = "/usr/local/bin/reddcoind"
+		core = "/usr/local/bin/rupeed"
 		result = subprocess.run([core,"getbalance",user],stdout=subprocess.PIPE)
 		clean = (result.stdout.strip()).decode("utf-8")
 		balance  = float(clean)
@@ -121,7 +153,7 @@ def withdraw(bot,update):
 		address = ''.join(str(e) for e in address)
 		target = target.replace(target[:35], '')
 		amount = float(target)
-		core = "/usr/local/bin/reddcoind"
+		core = "/usr/local/bin/rupeed"
 		result = subprocess.run([core,"getbalance",user],stdout=subprocess.PIPE)
 		clean = (result.stdout.strip()).decode("utf-8")
 		balance = float(clean)
@@ -176,6 +208,9 @@ balance_handler = CommandHandler('balance', balance)
 dispatcher.add_handler(balance_handler)
 
 help_handler = CommandHandler('help', help)
+dispatcher.add_handler(help_handler)
+
+help_handler = CommandHandler('register', register_user)
 dispatcher.add_handler(help_handler)
 
 updater.start_polling()
