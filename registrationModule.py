@@ -45,14 +45,17 @@ def registerUser(username):
     if user is not None:
     #if localdb.execute("SELECT count(*) FROM tipbotassociations WHERE user_id=?", (username, )).fetchone()[0] > 0:
         print("UserName Already Exists")
-        return user[1]
+        return user[1], True
 
 
     add_to_db('''INSERT INTO tipbotassociations(user_id, address)
                       VALUES(:user_id,:address)''',
                       {'user_id':username, 'address':str(uuid.uuid4().hex)})
 
+    user = query_db('select * from tipbotassociations where user_id = ?', [username], one=True)
+    return user[1],True                 
+
 
 # Call ALL Methods and see it works
-registerUser("Test3")
-print(get_all_entries())
+# registerUser("Test3")
+# print(get_all_entries())

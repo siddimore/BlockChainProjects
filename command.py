@@ -10,6 +10,7 @@ import subprocess
 from telegram.ext.dispatcher import run_async
 from telegram.ext import Updater
 from html import escape
+from registrationModule import registerUser
 
 from babel.numbers import format_currency
 import requests
@@ -40,9 +41,10 @@ def deposit(bot, update):
 
 def tip(bot,update):
 	user = update.message.from_user.username
-	target = update.message.text[5:]
-	amount =  target.split(" ")[1]
-	target =  target.split(" ")[0]
+	target = "@siddimore"
+	# target = update.message.text[5:]
+	# amount =  target.split(" ")[1]
+	# target =  target.split(" ")[0]
 	if user is None:
 		bot.send_message(chat_id=update.message.chat_id, text="Please set a telegram username in your profile settings!")
 	else:
@@ -52,19 +54,22 @@ def tip(bot,update):
 		elif "@" in target:
 			target = target[1:]
 			user = update.message.from_user.username
-			core = "/usr/local/bin/reddcoind"
-			result = subprocess.run([core,"getbalance",user],stdout=subprocess.PIPE)
-			balance = float((result.stdout.strip()).decode("utf-8"))
-			amount = float(amount)
-			if balance < amount:
-				bot.send_message(chat_id=update.message.chat_id, text="@{0} you have insufficent funds.".format(user))
-			elif target == user:
-				bot.send_message(chat_id=update.message.chat_id, text="You can't tip yourself silly.")
-			else:
-				balance = str(balance)
-				amount = str(amount)
-				tx = subprocess.run([core,"move",user,target,amount],stdout=subprocess.PIPE)
-				bot.send_message(chat_id=update.message.chat_id, text="@{0} tipped @{1} of {2} RDD".format(user, target, amount))
+			address, registered = registerUser(user)
+			print(address)
+			bot.send_message(chat_id=update.message.chat_id, text="@{0} your Tipping Wallet Address is {1}.".format(user, address))
+			# core = "/usr/local/bin/reddcoind"
+			# result = subprocess.run([core,"getbalance",user],stdout=subprocess.PIPE)
+			# balance = float((result.stdout.strip()).decode("utf-8"))
+			# amount = float(amount)
+			# if balance < amount:
+			# 	bot.send_message(chat_id=update.message.chat_id, text="@{0} you have insufficent funds.".format(user))
+			# elif target == user:
+			# 	bot.send_message(chat_id=update.message.chat_id, text="You can't tip yourself silly.")
+			# else:
+			# 	balance = str(balance)
+			# 	amount = str(amount)
+			# 	tx = subprocess.run([core,"move",user,target,amount],stdout=subprocess.PIPE)
+			# 	bot.send_message(chat_id=update.message.chat_id, text="@{0} tipped @{1} of {2} RDD".format(user, target, amount))
 		else:
 			bot.send_message(chat_id=update.message.chat_id, text="Error that user is not applicable.")
 
