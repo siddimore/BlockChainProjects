@@ -70,24 +70,12 @@ def tip(bot,update):
 		elif "@" in target:
 			target = target[1:]
 			user = update.message.from_user.username
-<<<<<<< HEAD
+			# Get Wallet Address Of Registered User
 			address, registered = registerUser(user)
 			print(address)
+			# Send Wallet Address Back To User
 			bot.send_message(chat_id=update.message.chat_id, text="@{0} your Tipping Wallet Address is {1}.".format(user, address))
-			# core = "/usr/local/bin/reddcoind"
-			# result = subprocess.run([core,"getbalance",user],stdout=subprocess.PIPE)
-			# balance = float((result.stdout.strip()).decode("utf-8"))
-			# amount = float(amount)
-			# if balance < amount:
-			# 	bot.send_message(chat_id=update.message.chat_id, text="@{0} you have insufficent funds.".format(user))
-			# elif target == user:
-			# 	bot.send_message(chat_id=update.message.chat_id, text="You can't tip yourself silly.")
-			# else:
-			# 	balance = str(balance)
-			# 	amount = str(amount)
-			# 	tx = subprocess.run([core,"move",user,target,amount],stdout=subprocess.PIPE)
-			# 	bot.send_message(chat_id=update.message.chat_id, text="@{0} tipped @{1} of {2} RDD".format(user, target, amount))
-=======
+			# Query User Balance
 			core = "/usr/local/bin/rupeed"
 			result = subprocess.run([core,"getbalance",user],stdout=subprocess.PIPE)
 			balance = float((result.stdout.strip()).decode("utf-8"))
@@ -101,7 +89,6 @@ def tip(bot,update):
 				amount = str(amount)
 				tx = subprocess.run([core,"move",user,target,amount],stdout=subprocess.PIPE)
 				bot.send_message(chat_id=update.message.chat_id, text="@{0} tipped @{1} of {2} RDD".format(user, target, amount))
->>>>>>> 3010d9972734d543aadfb0863cdacdf259657938
 		else:
 			bot.send_message(chat_id=update.message.chat_id, text="Error that user is not applicable.")
 
