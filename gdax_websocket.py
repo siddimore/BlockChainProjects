@@ -9,7 +9,21 @@ import thread
 from threading import Thread
 
 def on_message(ws, message):
-    print(message)
+    try:
+        messageDict = json.loads(message)
+        # Check Message Type and Log if the order is filled
+        if "type" in messageDict:
+            data = messageDict["type"]
+            if data == "done" and messageDict["reason"] == "filled":
+                print("OrderBook Done:")
+                print ("Product ID:" + messageDict["product_id"])
+                print ("Order ID:" + messageDict["order_id"])
+                print ("Price:" + messageDict["price"])
+                print ("Side: " + messageDict["side"])
+                print("\n")
+    except:
+        print('An error occurred.')
+
 
 def on_error(ws, error):
     print(error)
@@ -21,9 +35,10 @@ def on_close(ws):
 def on_open(ws):
     print("ONOPEN")
     def run(*args):
+        # Subscribe for Ticker and OrderBook
         message = {
             "type": "subscribe",
-            "channels": [{"name": "ticker", "product_ids": ["BTC-USD"]}]
+            "channels": [{"name": "full", "product_ids": ["BTC-USD"]}, {"name": "ticker", "product_ids": ["BTC-USD"]}]
         }
         ws.send(json.dumps(message))
         while True:
