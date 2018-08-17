@@ -10,12 +10,13 @@ from threading import Thread
 
 def on_message(ws, message):
     try:
+
         messageDict = json.loads(message)
         # Check Message Type and Log if the order is filled
         if "type" in messageDict:
             data = messageDict["type"]
             if data == "done" and messageDict["reason"] == "filled":
-                print("OrderBook Done:")
+                print("new Order " + str(messageDict["sequence"]) + ": " )
                 print ("Product ID:" + messageDict["product_id"])
                 print ("Order ID:" + messageDict["order_id"])
                 print ("Price:" + messageDict["price"])
